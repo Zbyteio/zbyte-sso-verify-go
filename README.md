@@ -8,7 +8,7 @@
 ```go
 srv.GET("/a", func(ctx *gin.Context) {
   access_token := ctx.GetHeader("Authorization")
-	isValid, err := middleware.MiddlewareHandler.KeycloakTokenVerify(access_token, "https://appdev.zbyte.io/keycloak-poc/")
+	isValid, err := middleware.MiddlewareHandler.verifyOffline(access_token, "https://appdev.zbyte.io/keycloak-poc/")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error" : err.Error(),

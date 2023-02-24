@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (m *middlewareStruct) KeycloakTokenVerify(accessToken string, keycloakDomain string) (jwtResponse *VerifyJwtTokenResponseKeycloak, errorData error) {
+func (m *middlewareStruct) verifyOffline(accessToken string, keycloakDomain string) (jwtResponse *VerifyJwtTokenResponseKeycloak, errorData error) {
 	var errorMsg string = ""
 	if accessToken == "" {
 		errorMsg = "cannot get a valid access token"
