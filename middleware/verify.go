@@ -13,10 +13,11 @@ import (
 	"time"
 
 	"github.com/MicahParks/keyfunc"
+	"github.com/Zbyteio/zbyte-sso-verify-go/config"
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (m *middlewareStruct) VerifyOffline(accessToken string, baseUrl string) (jwtResponse *VerifyJwtOfflineTokenResponse, errorData error) {
+func (m *middlewareStruct) VerifyOffline(accessToken string, baseUrl string, realm string) (jwtResponse *VerifyJwtOfflineTokenResponse, errorData error) {
 	var errorMsg string = ""
 	if accessToken == "" {
 		errorMsg = "cannot get a valid access token"
@@ -32,7 +33,7 @@ func (m *middlewareStruct) VerifyOffline(accessToken string, baseUrl string) (jw
 		accessToken = accessToken[7:]
 	}
 
-	jwks_url := fmt.Sprintf("%s/realms/community/protocol/openid-connect/certs", baseUrl)
+	jwks_url := fmt.Sprintf("%s/%s/%s/%s", baseUrl, config.REALMS, realm, config.CERTS_URL)
 
 	// Create a context that, when cancelled, ends the JWKS background refresh goroutine.
 	ctx, cancel := context.WithCancel(context.Background())
@@ -91,7 +92,7 @@ func (m *middlewareStruct) VerifyOffline(accessToken string, baseUrl string) (jw
 	return data, nil
 }
 
-func (m *middlewareStruct) VerifyOnline(accessToken string, baseUrl string, clientId string, clientSecret string) (jwtResponse *VerifyJwtOnlineResponseKeycloak, errorData error) {
+func (m *middlewareStruct) VerifyOnline(accessToken string, baseUrl string, realm string, clientId string, clientSecret string) (jwtResponse *VerifyJwtOnlineResponseKeycloak, errorData error) {
 	var errorMsg string = ""
 
 	//check if accesstoken passed is not empty
@@ -127,7 +128,7 @@ func (m *middlewareStruct) VerifyOnline(accessToken string, baseUrl string, clie
 	client := &http.Client{}
 
 	//form introspect URL using baseUrl passed
-	keycloak_introspect_url := fmt.Sprintf("%s/realms/community/protocol/openid-connect/token/introspect", baseUrl)
+	introspect_url := fmt.Sprintf("%s/%s/%s/%s", baseUrl, config.REALMS, realm, config.INTROSPECT_URL)
 
 	//form request body using params passed
 	data := url.Values{}
@@ -135,14 +136,16 @@ func (m *middlewareStruct) VerifyOnline(accessToken string, baseUrl string, clie
 	data.Set("client_secret", clientSecret)
 	data.Set("token", accessToken)
 
-	r, err := http.NewRequest(http.MethodPost, keycloak_introspect_url, strings.NewReader(data.Encode()))
+	r, err := http.NewRequest(http.MethodPost, introspect_url, strings.NewReader(data.Encode()))
 	if err != nil {
 		errorMsg = "unable to create token introspect request"
 		return nil, errors.New(errorMsg)
 	}
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	fmt.Printf("url %s\n", introspect_url)
 
 	res, err := client.Do(r)
+	fmt.Printf("err %s\n", err)
 	if err != nil {
 		errorMsg = "failed API call"
 		return nil, errors.New(errorMsg)
