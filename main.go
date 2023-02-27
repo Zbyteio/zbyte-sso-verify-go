@@ -1,0 +1,27 @@
+package main
+
+import (
+	"net/http"
+
+	"github.com/Zbyteio/zbyte-sso-verify-go/middleware"
+	"github.com/gin-gonic/gin"
+)
+
+func main() {
+	srv := gin.Default()
+	srv.GET("/a", func(ctx *gin.Context) {
+		access_token := "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJra05EQW9YamEyZFFEUDZYY3FLV3h0akJ2b2NXVVZzV0VRVFZBdWZwdmVzIn0.eyJleHAiOjE2Nzc0OTI4MjAsImlhdCI6MTY3NzQ5MTkyMCwianRpIjoiMWVkYzZiOGItN2EyYi00ZmFkLThmNWYtODg1N2RiZWUyM2U5IiwiaXNzIjoiaHR0cHM6Ly9kcGxhdGRldi56Ynl0ZS5pby9rYy9yZWFsbXMvY29tbXVuaXR5IiwiYXVkIjoiYWNjb3VudCIsInN1YiI6IjM4YjRhNTY0LTRjOTEtNGVjMy1iNTQ4LTA2MzdjNzc4MmZmYiIsInR5cCI6IkJlYXJlciIsImF6cCI6ImxjbmMtYXBwIiwic2Vzc2lvbl9zdGF0ZSI6ImE4MmMwNTQ0LWE5MzMtNGVmYy1iMzAwLTIzOGQ5MmQyYjUyMyIsImFjciI6IjEiLCJhbGxvd2VkLW9yaWdpbnMiOlsiaHR0cHM6Ly9kcGxhdGRldi56Ynl0ZS5pby8iLCJodHRwczovL2Rldi56Ynl0ZS5pby8iLCJodHRwOi8vbG9jYWxob3N0OjMwMDAvIl0sInJlYWxtX2FjY2VzcyI6eyJyb2xlcyI6WyJ6Ynl0ZV9hZG1pbiIsIm9mZmxpbmVfYWNjZXNzIiwiYXBwLWFkbWluIiwiZGVmYXVsdC1yb2xlcy1jb21tdW5pdHkiLCJkZXZlbG9wZXIiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIGVtYWlsIHByb2ZpbGUiLCJzaWQiOiJhODJjMDU0NC1hOTMzLTRlZmMtYjMwMC0yMzhkOTJkMmI1MjMiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwibmFtZSI6InZhcnNoYSBrYW1ibGUiLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJ2YXJzaDAwOEBnbWFpbC5jb20iLCJnaXZlbl9uYW1lIjoidmFyc2hhIiwiZmFtaWx5X25hbWUiOiJrYW1ibGUiLCJlbWFpbCI6InZhcnNoMDA4QGdtYWlsLmNvbSJ9.ZqdtrgjYbrfR-Hr72PbivOw3XkpJdxaUC2KTEpF250FlwTO6Zp_k2h9tDcUtz0zP15JIKnabIFI5OcwwBMCt0dsaMk6kvjQ9L80Ydm6bmnS-Q-BGZ87BRBgfpGaiF1kVrJsro1Tvf512Y8CE5DnySvDJ45W4bVDRFeQ3UXgWRJAW4Mr0f_3o9hoAmtQb-nAUSTmL401HYzLWmeSfCoqYa5CwBjRr5I1DCYUBkDiwNSvnYhzicr8H5yp32Go_FU1Z698iQuDD_LlPkNp4ET4itbpJzo500tBPZo8TkYBAS3SbEpkRVAaykaEAKMN1wSCesa0Y44lKBF8DEJnAMiJlnQ"
+
+		isValid, err := middleware.MiddlewareHandler.VerifyOffline(access_token, "https://dplatdev.zbyte.io/kc")
+
+		// isValid, err := middleware.MiddlewareHandler.VerifyOnline(access_token, "https://dplatdev.zbyte.io/kc", "lcnc-app", "8T4QEaE5aRIbn9bChDPyVIq4dnjJsxaW")
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+		ctx.JSON(http.StatusAccepted, isValid)
+	})
+	srv.Run()
+}

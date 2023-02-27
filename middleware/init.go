@@ -5,5 +5,5 @@ type middlewareStruct struct{}
 var MiddlewareHandler middlewareInterface = &middlewareStruct{}
 
 type middlewareInterface interface {
-	VerifyOffline(accessToken string, keycloakBaseUrl string) (jwtResponse *VerifyJwtTokenResponseKeycloak, errorData error)
+	VerifyOffline(accessToken string, baseUrl string) (jwtResponse *VerifyJwtOfflineTokenResponse, errorData error)
 }

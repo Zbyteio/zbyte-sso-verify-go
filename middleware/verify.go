@@ -12,15 +12,15 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (m *middlewareStruct) VerifyOffline(accessToken string, keycloakBaseUrl string) (jwtResponse *VerifyJwtTokenResponseKeycloak, errorData error) {
+func (m *middlewareStruct) VerifyOffline(accessToken string, baseUrl string) (jwtResponse *VerifyJwtOfflineTokenResponse, errorData error) {
 	var errorMsg string = ""
 	if accessToken == "" {
 		errorMsg = "cannot get a valid access token"
 		return nil, errors.New(errorMsg)
 	}
 
-	if keycloakBaseUrl == "" {
-		errorMsg = "cannot get a valid keycloak base url"
+	if baseUrl == "" {
+		errorMsg = "cannot get a valid base url"
 		return nil, errors.New(errorMsg)
 	}
 
@@ -28,7 +28,7 @@ func (m *middlewareStruct) VerifyOffline(accessToken string, keycloakBaseUrl str
 		accessToken = accessToken[7:]
 	}
 
-	keycloak_jwks_url := fmt.Sprintf("%s/realms/community/protocol/openid-connect/certs", keycloakBaseUrl)
+	jwks_url := fmt.Sprintf("%s/realms/community/protocol/openid-connect/certs", baseUrl)
 
 	// Create a context that, when cancelled, ends the JWKS background refresh goroutine.
 	ctx, cancel := context.WithCancel(context.Background())
@@ -49,7 +49,7 @@ func (m *middlewareStruct) VerifyOffline(accessToken string, keycloakBaseUrl str
 	}
 
 	// Create the JWKS from the resource at the given URL.
-	jwks, err := keyfunc.Get(keycloak_jwks_url, options)
+	jwks, err := keyfunc.Get(jwks_url, options)
 	if err != nil {
 		cancel()
 		errorMsg = fmt.Sprintf("Failed to create JWKS from resource at the given URL.\nError: %s", err.Error())
@@ -71,7 +71,7 @@ func (m *middlewareStruct) VerifyOffline(accessToken string, keycloakBaseUrl str
 	}
 
 	// create response object to respond with
-	data := &VerifyJwtTokenResponseKeycloak{
+	data := &VerifyJwtOfflineTokenResponse{
 		Status: token.Valid,
 		Header: token.Header,
 		Data:   token.Claims,
@@ -83,8 +83,6 @@ func (m *middlewareStruct) VerifyOffline(accessToken string, keycloakBaseUrl str
 	// This will be ineffectual because the line above this canceled the parent context.Context.
 	// This method call is idempotent similar to context.CancelFunc.
 	jwks.EndBackground()
-	fmt.Printf("I am inside a function!!")
-	fmt.Println(data)
 	// return data
 	return data, nil
 }

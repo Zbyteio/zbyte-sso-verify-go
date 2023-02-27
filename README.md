@@ -4,7 +4,7 @@
 	
 	`go get github.com/Zbyteio/zbyte-sso-verify-go`
 
-2. Use the new keycloak access token verification as follows
+2. Use the new access token verification as follows
 ```go
 srv.GET("/a", func(ctx *gin.Context) {
   access_token := ctx.GetHeader("Authorization")
