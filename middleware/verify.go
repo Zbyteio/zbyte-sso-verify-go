@@ -12,14 +12,14 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func (m *middlewareStruct) verifyOffline(accessToken string, keycloakDomain string) (jwtResponse *VerifyJwtTokenResponseKeycloak, errorData error) {
+func (m *middlewareStruct) VerifyOffline(accessToken string, keycloakBaseUrl string) (jwtResponse *VerifyJwtTokenResponseKeycloak, errorData error) {
 	var errorMsg string = ""
 	if accessToken == "" {
 		errorMsg = "cannot get a valid access token"
 		return nil, errors.New(errorMsg)
 	}
 
-	if keycloakDomain == "" {
+	if keycloakBaseUrl == "" {
 		errorMsg = "cannot get a valid keycloak base url"
 		return nil, errors.New(errorMsg)
 	}
@@ -28,7 +28,7 @@ func (m *middlewareStruct) verifyOffline(accessToken string, keycloakDomain stri
 		accessToken = accessToken[7:]
 	}
 
-	keycloak_jwks_url := fmt.Sprintf("https://%s.zbyte.io/kc/realms/community/protocol/openid-connect/certs", keycloakDomain)
+	keycloak_jwks_url := fmt.Sprintf("%s/realms/community/protocol/openid-connect/certs", keycloakBaseUrl)
 
 	// Create a context that, when cancelled, ends the JWKS background refresh goroutine.
 	ctx, cancel := context.WithCancel(context.Background())
@@ -83,7 +83,8 @@ func (m *middlewareStruct) verifyOffline(accessToken string, keycloakDomain stri
 	// This will be ineffectual because the line above this canceled the parent context.Context.
 	// This method call is idempotent similar to context.CancelFunc.
 	jwks.EndBackground()
-
+	fmt.Printf("I am inside a function!!")
+	fmt.Println(data)
 	// return data
 	return data, nil
 }
